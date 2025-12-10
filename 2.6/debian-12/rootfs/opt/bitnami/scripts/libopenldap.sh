@@ -663,11 +663,15 @@ ldap_initialize() {
             ldap_configure_password_hash
         fi
         if is_boolean_yes "$LDAP_CONFIGURE_PPOLICY"; then
-            ldap_configure_ppolicy
+            if [[ $(echo $POD_NAME | cut -d - -f 2) -lt 1 ]]; then
+                ldap_configure_ppolicy
+            fi
         fi
         # enable accesslog overlay
         if is_boolean_yes "$LDAP_ENABLE_ACCESSLOG"; then
-            ldap_enable_accesslog
+            if [[ $(echo $POD_NAME | cut -d - -f 2) -lt 1 ]]; then
+                ldap_enable_accesslog
+            fi
         fi
         # enable syncprov overlay
         if is_boolean_yes "$LDAP_ENABLE_SYNCPROV"; then
@@ -948,4 +952,19 @@ olcSpCheckpoint: $LDAP_SYNCPROV_CHECKPPOINT
 olcSpSessionLog: $LDAP_SYNCPROV_SESSIONLOG
 EOF
     debug_execute ldapadd -Q -Y EXTERNAL -H "ldapi:///" -f "${LDAP_SHARE_DIR}/syncprov_create_overlay_configuration.ldif"
+
+    if is_boolean_yes "$LDAP_ENABLE_ACCESSLOG"; then
+        if [[ $(echo $POD_NAME | cut -d - -f 2) -lt 1 ]]; then
+            cat > "${LDAP_SHARE_DIR}/syncprov_create_accesslogoverlay_configuration.ldif" << EOF
+dn: olcOverlay=syncprov,olcDatabase={3}mdb,cn=config
+objectClass: olcOverlayConfig
+objectClass: olcSyncProvConfig
+olcOverlay: syncprov
+olcSpCheckpoint: $LDAP_SYNCPROV_CHECKPPOINT
+olcSpSessionLog: $LDAP_SYNCPROV_SESSIONLOG
+EOF
+            debug_execute ldapadd -Q -Y EXTERNAL -H "ldapi:///" -f "${LDAP_SHARE_DIR}/syncprov_create_accesslogoverlay_configuration.ldif"
+        fi
+    fi
+
 }
