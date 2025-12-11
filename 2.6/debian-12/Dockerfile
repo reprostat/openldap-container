@@ -40,7 +40,25 @@ RUN mkdir -p /tmp/bitnami/pkg/cache/ ; cd /tmp/bitnami/pkg/cache/ ; \
       tar -zxf "${COMPONENT}.tar.gz" -C /opt/bitnami --strip-components=2 --no-same-owner --wildcards '*/files' ; \
       rm -rf "${COMPONENT}".tar.gz{,.sha256} ; \
     done
-RUN apt-get autoremove --purge -y curl && \
+# Build and install check_password.so module
+RUN install_packages git build-essential libcrack2-dev libldap2-dev libsasl2-dev libssl-dev groff-base && \
+    cd /tmp && \
+    curl -SsLf https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.6.9.tgz -o openldap-2.6.9.tgz && \
+    tar -xzf openldap-2.6.9.tgz && \
+    cd openldap-2.6.9 && \
+    ./configure --prefix=/tmp/openldap-build --disable-slapd --disable-backends && \
+    make depend && \
+    cd /tmp && \
+    git clone https://github.com/ltb-project/openldap-ppolicy-check-password.git && \
+    cd openldap-ppolicy-check-password && \
+    make CC=gcc \
+         LDAP_INC="-I/tmp/openldap-2.6.9/include -I/tmp/openldap-2.6.9/servers/slapd" \
+         LDAP_LIB="-lldap_r -llber" \
+         LIBDIR=/opt/bitnami/openldap/lib && \
+    mkdir -p /opt/bitnami/openldap/lib/openldap && \
+    cp check_password.so /opt/bitnami/openldap/lib/openldap && \
+    cd / && rm -rf /tmp/openldap-ppolicy-check-password /tmp/openldap-2.6.9 /tmp/openldap-2.6.9.tgz && \
+    apt-get autoremove --purge -y git build-essential libcrack2-dev libldap2-dev libsasl2-dev libssl-dev groff-base && \
     apt-get update && apt-get upgrade -y && \
     apt-get clean && rm -rf /var/lib/apt/lists /var/cache/apt/archives
 RUN chmod g+rwX /opt/bitnami
