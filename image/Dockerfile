@@ -32,7 +32,8 @@ RUN <<EOF
   apt-get install --no-install-recommends -y \
     build-essential \
     ca-certificates \
-    git
+    git \
+    openssl
 
   git config --global advice.detachedHead false
   git config --global core.sparseCheckout true
@@ -40,19 +41,26 @@ RUN <<EOF
 EOF
 
 WORKDIR /opt/openldap-src
-RUN git clone --depth 1 https://github.com/openldap/openldap.git .
+RUN <<EOF
+  echo "#################################################"
+  echo "Building and installing slapd..."
+  echo "#################################################"
+  git clone --depth 1 https://github.com/openldap/openldap.git .
+  git fetch origin refs/tags/OPENLDAP_REL_ENG_${VERSION//./_}:refs/tags/${VERSION}
+  git checkout tags/${VERSION} -b ${VERSION}
+EOF
 WORKDIR /opt/openldap-src
-RUN git fetch origin refs/tags/OPENLDAP_REL_ENG_${VERSION//./_}:refs/tags/${VERSION}
+RUN <<EOF
+  ./configure \
+    --with-tls=openssl \
+    --with-cyrus-sasl=yes
+EOF
 WORKDIR /opt/openldap-src
-RUN git checkout tags/${VERSION} -b ${VERSION}
-WORKDIR /opt/openldap-src
-RUN ./configure --with-tls=openssl --with-cyrus-sasl=yes
-WORKDIR /opt/openldap-src
-RUN make depend
-WORKDIR /opt/openldap-src
-RUN make
-WORKDIR /opt/openldap-src
-RUN make install
+RUN <<EOF
+  make depend
+  make
+  make install
+EOF
 
 WORKDIR /opt/jni-headers
 ENV JVM_DIR=/usr/lib/jvm/openjdk11
