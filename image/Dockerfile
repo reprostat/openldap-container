@@ -33,7 +33,7 @@ RUN <<EOF
     build-essential \
     ca-certificates \
     git \
-    libssl-dev 
+    libssl-dev \
     libsasl2-dev
 
   git config --global advice.detachedHead false
