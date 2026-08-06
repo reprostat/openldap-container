@@ -20,7 +20,7 @@ FROM ${BASE_IMAGE} AS pqchecker-build
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG LC_ALL=C
-ARG VERSION=2_6_13
+ARG VERSION
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
@@ -39,16 +39,20 @@ RUN <<EOF
   git config --global init.defaultBranch main
 EOF
 
+echo "#################################################"
+echo "Building and installing slapd..."
+echo "#################################################"
 WORKDIR /opt/openldap-src
 RUN <<EOF
   git clone --depth 1 https://github.com/openldap/openldap.git .
-  git fetch origin refs/tags/OPENLDAP_REL_ENG_${VERSION}:refs/tags/${VERSION}
-  git checkout tags/${VERSION} -b ${VERSION}
+  git fetch origin refs/tags/OPENLDAP_REL_ENG_${VERSION//./_}:refs/tags/${VERSION//./_}
+  git checkout tags/${VERSION//./_} -b ${VERSION//./_}
   ./configure \
       --with-tls=openssl \
       --with-cyrus-sasl=yes
   make depend
   make
+  make install
 EOF
 
 WORKDIR /opt/jni-headers
@@ -130,10 +134,6 @@ RUN --mount=type=bind,source=.shared,target=/mnt/shared <<EOF
   echo "#################################################"
   apt-get install --no-install-recommends -y tini
 
-  echo "#################################################"
-  echo "Installing slapd..."
-  echo "#################################################"
-  cd /opt/openldap-src; make install
   echo "OpenLDAP $(slapd -VV)" >> /opt/build_info
   # workaround for 'service slapd stop' not working, see https://stackoverflow.com/a/58792698/5116073
   sed -i 's/--exec $SLAPD 2/--name slapd 2/' /etc/init.d/slapd

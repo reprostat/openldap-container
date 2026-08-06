@@ -96,6 +96,7 @@ build_opts=(
   # using the current date as value for BASE_LAYER_CACHE_KEY, i.e. the base layer cache (that holds system packages with security updates) will be invalidate once per day
   --build-arg BASE_LAYER_CACHE_KEY="$base_layer_cache_key"
   --build-arg BASE_IMAGE="$base_image"
+  --build-arg VERSION="${OPENLDAP_VERSION}"
   --build-arg GIT_BRANCH="${GIT_BRANCH:-$(git rev-parse --abbrev-ref HEAD)}"
   --build-arg GIT_COMMIT_DATE="$(date -d "@$(git log -1 --format='%at')" --utc +'%Y-%m-%d %H:%M:%S UTC')"
   --build-arg INSTALL_SUPPORT_TOOLS="${INSTALL_SUPPORT_TOOLS:-0}"
@@ -156,10 +157,11 @@ fi
 #################################################
 # determine effective OpenLDAP version
 #################################################
-echo
-log INFO "Determining effective OpenLDAP version of [$image_name]..."
-# LC_ALL=en_US.utf8 -> workaround for "grep: -P supports only unibyte and UTF-8 locales"
-ldap_version=$(docker run --rm "$image_name" dpkg -s slapd | LC_ALL=en_US.utf8 grep -oP 'Version: \K\d+\.\d+\.\d+')
+#echo
+#log INFO "Determining effective OpenLDAP version of [$image_name]..."
+## LC_ALL=en_US.utf8 -> workaround for "grep: -P supports only unibyte and UTF-8 locales"
+#ldap_version=$(docker run --rm "$image_name" dpkg -s slapd | LC_ALL=en_US.utf8 grep -oP 'Version: \K\d+\.\d+\.\d+')
+ldap_version=${OPENLDAP_VERSION}
 echo "ldap_version=$ldap_version"
 
 
