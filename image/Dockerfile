@@ -45,11 +45,9 @@ RUN <<EOF
   echo "Building and installing slapd..."
   echo "#################################################"
   git clone --depth 1 https://github.com/openldap/openldap.git .
-  git fetch origin refs/tags/OPENLDAP_REL_ENG_${VERSION//./_}:refs/tags/${VERSION//./_}
-  git checkout tags/${VERSION//./_} -b ${VERSION//./_}
-  ./configure \
-      --with-tls=openssl \
-      --with-cyrus-sasl=yes
+  git fetch origin refs/tags/OPENLDAP_REL_ENG_${VERSION//./_}:refs/tags/${VERSION}
+  git checkout tags/${VERSION} -b ${VERSION}
+  ./configure --with-tls=openssl --with-cyrus-sasl=yes
   make depend
   make
   make install
