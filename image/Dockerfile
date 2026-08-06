@@ -49,12 +49,14 @@ RUN <<EOF
   git fetch origin refs/tags/OPENLDAP_REL_ENG_${VERSION//./_}:refs/tags/${VERSION}
   git checkout tags/${VERSION} -b ${VERSION}
 EOF
+
 WORKDIR /opt/openldap-src
 RUN <<EOF
   ./configure \
     --with-tls=openssl \
     --with-cyrus-sasl=yes
 EOF
+
 WORKDIR /opt/openldap-src
 RUN <<EOF
   make depend
