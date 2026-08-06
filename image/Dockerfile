@@ -34,7 +34,8 @@ RUN <<EOF
     ca-certificates \
     git \
     libssl-dev \
-    libsasl2-dev
+    libsasl2-dev \
+    groff-base
 
   git config --global advice.detachedHead false
   git config --global core.sparseCheckout true
@@ -49,10 +50,6 @@ RUN <<EOF
   git clone --depth 1 https://github.com/openldap/openldap.git .
   git fetch origin refs/tags/OPENLDAP_REL_ENG_${VERSION//./_}:refs/tags/${VERSION}
   git checkout tags/${VERSION} -b ${VERSION}
-EOF
-
-WORKDIR /opt/openldap-src
-RUN <<EOF
   ./configure \
     --with-tls=openssl \
     --with-cyrus-sasl=yes
@@ -61,7 +58,15 @@ EOF
 WORKDIR /opt/openldap-src
 RUN <<EOF
   make depend
+EOF
+
+WORKDIR /opt/openldap-src
+RUN <<EOF
   make
+EOF
+
+WORKDIR /opt/openldap-src
+RUN <<EOF
   make install
 EOF
 
