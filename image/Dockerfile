@@ -20,6 +20,7 @@ FROM ${BASE_IMAGE} AS pqchecker-build
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG LC_ALL=C
+ARG VERSION=2_6_13
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
@@ -40,7 +41,9 @@ EOF
 
 WORKDIR /opt/openldap-src
 RUN <<EOF
-  git clone --depth 1 --branch OPENLDAP_REL_ENG_2_6 https://github.com/openldap/openldap.git .
+  git clone --depth 1 https://github.com/openldap/openldap.git .
+  git fetch origin refs/tags/OPENLDAP_REL_ENG_${VERSION}:refs/tags/${VERSION}
+  git checkout tags/${VERSION} -b ${VERSION}
   ./configure
   make depend
 EOF
