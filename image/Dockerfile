@@ -33,7 +33,7 @@ RUN <<EOF
     build-essential \
     ca-certificates \
     git \
-    openssl
+    libssl-dev 
 
   git config --global advice.detachedHead false
   git config --global core.sparseCheckout true
