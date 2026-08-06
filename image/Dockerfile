@@ -39,11 +39,11 @@ RUN <<EOF
   git config --global init.defaultBranch main
 EOF
 
-echo "#################################################"
-echo "Building and installing slapd..."
-echo "#################################################"
 WORKDIR /opt/openldap-src
 RUN <<EOF
+  echo "#################################################"
+  echo "Building and installing slapd..."
+  echo "#################################################"
   git clone --depth 1 https://github.com/openldap/openldap.git .
   git fetch origin refs/tags/OPENLDAP_REL_ENG_${VERSION//./_}:refs/tags/${VERSION//./_}
   git checkout tags/${VERSION//./_} -b ${VERSION//./_}
