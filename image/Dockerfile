@@ -40,15 +40,19 @@ RUN <<EOF
 EOF
 
 WORKDIR /opt/openldap-src
-RUN <<EOF
-  git clone --depth 1 https://github.com/openldap/openldap.git .
-  git fetch origin refs/tags/OPENLDAP_REL_ENG_${VERSION//./_}:refs/tags/${VERSION}
-  git checkout tags/${VERSION} -b ${VERSION}
-  ./configure --with-tls=openssl --with-cyrus-sasl=yes
-  make depend
-  make
-  make install
-EOF
+RUN git clone --depth 1 https://github.com/openldap/openldap.git .
+WORKDIR /opt/openldap-src
+RUN git fetch origin refs/tags/OPENLDAP_REL_ENG_${VERSION//./_}:refs/tags/${VERSION}
+WORKDIR /opt/openldap-src
+RUN git checkout tags/${VERSION} -b ${VERSION}
+WORKDIR /opt/openldap-src
+RUN ./configure --with-tls=openssl --with-cyrus-sasl=yes
+WORKDIR /opt/openldap-src
+RUN make depend
+WORKDIR /opt/openldap-src
+RUN make
+WORKDIR /opt/openldap-src
+RUN make install
 
 WORKDIR /opt/jni-headers
 ENV JVM_DIR=/usr/lib/jvm/openjdk11
