@@ -41,9 +41,6 @@ EOF
 
 WORKDIR /opt/openldap-src
 RUN <<EOF
-  echo "#################################################"
-  echo "Building and installing slapd..."
-  echo "#################################################"
   git clone --depth 1 https://github.com/openldap/openldap.git .
   git fetch origin refs/tags/OPENLDAP_REL_ENG_${VERSION//./_}:refs/tags/${VERSION}
   git checkout tags/${VERSION} -b ${VERSION}

@@ -157,11 +157,10 @@ fi
 #################################################
 # determine effective OpenLDAP version
 #################################################
-#echo
-#log INFO "Determining effective OpenLDAP version of [$image_name]..."
-## LC_ALL=en_US.utf8 -> workaround for "grep: -P supports only unibyte and UTF-8 locales"
-#ldap_version=$(docker run --rm "$image_name" dpkg -s slapd | LC_ALL=en_US.utf8 grep -oP 'Version: \K\d+\.\d+\.\d+')
-ldap_version=${OPENLDAP_VERSION}
+echo
+log INFO "Determining effective OpenLDAP version of [$image_name]..."
+# LC_ALL=en_US.utf8 -> workaround for "grep: -P supports only unibyte and UTF-8 locales"
+ldap_version=$(docker run --rm "$image_name" slapd -VV 2>&1 | grep -oP '(?<=slapd )[0-9\.]+')
 echo "ldap_version=$ldap_version"
 
 
