@@ -34,6 +34,7 @@ RUN <<EOF
     ca-certificates \
     git \
     libssl-dev 
+    libsasl2-dev
 
   git config --global advice.detachedHead false
   git config --global core.sparseCheckout true
