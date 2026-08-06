@@ -44,14 +44,15 @@ RUN <<EOF
   git clone --depth 1 https://github.com/openldap/openldap.git .
   git fetch origin refs/tags/OPENLDAP_REL_ENG_${VERSION}:refs/tags/${VERSION}
   git checkout tags/${VERSION} -b ${VERSION}
-  ./configure
+  ./configure \
+      --with-tls=openssl \
+      --with-cyrus-sasl=yes
   make depend
+  make
 EOF
 
 WORKDIR /opt/jni-headers
-
 ENV JVM_DIR=/usr/lib/jvm/openjdk11
-
 RUN <<EOF
   set -x
 
@@ -68,7 +69,6 @@ RUN <<EOF
 EOF
 
 WORKDIR /opt/pqchecker
-
 RUN <<EOF
   set -eu
 
@@ -133,10 +133,8 @@ RUN --mount=type=bind,source=.shared,target=/mnt/shared <<EOF
   echo "#################################################"
   echo "Installing slapd..."
   echo "#################################################"
-  echo 'slapd slapd/root_password password whatever' | debconf-set-selections
-  echo 'slapd slapd/root_password_again password whatever' | debconf-set-selections
-  apt-get install --no-install-recommends -y slapd ldap-utils
-  echo "OpenLDAP $(apt-cache show slapd | grep Version)" >> /opt/build_info
+  cd /opt/openldap-src; make install
+  echo "OpenLDAP $(slapd -VV)" >> /opt/build_info
   # workaround for 'service slapd stop' not working, see https://stackoverflow.com/a/58792698/5116073
   sed -i 's/--exec $SLAPD 2/--name slapd 2/' /etc/init.d/slapd
 
