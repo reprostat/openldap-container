@@ -146,13 +146,13 @@ jobs:
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
-        password: ${{ secrets.DEPLOY_TOKEN }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
 
     - name: Build docker image
       env:
         DOCKER_IMAGE_REPO: ${{ github.repository_owner }}/${{ env.DOCKER_REPO_NAME }}
-        TRIVY_GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        TRIVY_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: bash build-image.sh
 
     outputs:
