@@ -53,21 +53,16 @@ RUN <<EOF
   ./configure \
     --with-tls=openssl \
     --with-cyrus-sasl=yes
-EOF
-
-WORKDIR /opt/openldap-src
-RUN <<EOF
   make depend
-EOF
-
-WORKDIR /opt/openldap-src
-RUN <<EOF
   make
-EOF
-
-WORKDIR /opt/openldap-src
-RUN <<EOF
   make install
+  ln -s /usr/local/etc/openldap/ /etc/ldap
+  ln -s /usr/local/libexec/slapd /usr/sbin/slapd
+  mkdir -p /var/lib/ldap
+  sed -i 's|^directory.*|directory       /var/lib/ldap|' /etc/ldap/slapd.conf
+  slaptest -f /etc/ldap/slapd.conf -F /etc/ldap/slapd.d
+  useradd -M openldap
+  chown -R openldap:openldap /usr/local/etc/openldap
 EOF
 
 WORKDIR /opt/jni-headers
@@ -115,7 +110,6 @@ RUN <<EOF
       libdir=/usr/lib/ldap \
       PARAMDIR=/etc/ldap/pqchecker
   make
-
 EOF
 
 
@@ -150,8 +144,8 @@ RUN --mount=type=bind,source=.shared,target=/mnt/shared <<EOF
   apt-get install --no-install-recommends -y tini
 
   echo "OpenLDAP $(slapd -VV)" >> /opt/build_info
-  # workaround for 'service slapd stop' not working, see https://stackoverflow.com/a/58792698/5116073
-  sed -i 's/--exec $SLAPD 2/--name slapd 2/' /etc/init.d/slapd
+  ## workaround for 'service slapd stop' not working, see https://stackoverflow.com/a/58792698/5116073
+  # sed -i 's/--exec $SLAPD 2/--name slapd 2/' /etc/init.d/slapd
 
   echo "#################################################"
   echo "Moving config and data directories..."
