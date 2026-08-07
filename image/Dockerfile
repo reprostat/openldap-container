@@ -60,6 +60,7 @@ RUN <<EOF
   ln -s /usr/local/libexec/slapd /usr/sbin/slapd
   mkdir -p /var/lib/ldap
   sed -i 's|^directory.*|directory       /var/lib/ldap|' /etc/ldap/slapd.conf
+  mkidr /etc/ldap/slapd.d
   slaptest -f /etc/ldap/slapd.conf -F /etc/ldap/slapd.d
   useradd -M openldap
   chown -R openldap:openldap /usr/local/etc/openldap
